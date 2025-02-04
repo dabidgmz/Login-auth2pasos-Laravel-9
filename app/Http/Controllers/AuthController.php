@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Session;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\URL;
+use App\Mail\VerifyEmailAddress;
 
 class AuthController extends Controller
 {
@@ -65,7 +67,7 @@ class AuthController extends Controller
         $validatedData['name'] = htmlspecialchars(trim($validatedData['name']), ENT_QUOTES, 'UTF-8');
         $validatedData['email'] = filter_var(trim($validatedData['email']), FILTER_SANITIZE_EMAIL);
 
-        User::create([
+        $user = User::create([
             'name' => $validatedData['name'],
             'phone' => $validatedData['phone'],
             'email' => $validatedData['email'],
@@ -73,8 +75,7 @@ class AuthController extends Controller
         ]);
 
         
-        
-        return redirect()->route('login')->with('success', ErrorCodes::S2001 . ' User registered successfully!');
+        return redirect()->signedRoute('login')->with('success', ErrorCodes::S2001 . ' User registered successfully!');
     }
 
     /**
@@ -111,7 +112,7 @@ class AuthController extends Controller
         $user->save();
         
         Mail::to($user->email)->send(new VerifyEmail($user, $verificationCode));
-        return redirect()->route('verifyCode')->with('success', ErrorCodes::S2002 . ' Please check your email for the verification code.');
+        return redirect()->signedRoute('verifyCode')->with('success', ErrorCodes::S2002 . ' Please check your email for the verification code.');
     }
 
     /**
@@ -126,7 +127,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
     
-        return redirect()->route('login')->with('success', ErrorCodes::S2003 . ' You have been logged out successfully.');
+        return redirect()->signedRoute('login')->with('success', ErrorCodes::S2003 . ' You have been logged out successfully.');
     }
    
     /**
@@ -139,6 +140,10 @@ class AuthController extends Controller
     {
         $verifyData = $request->validate([
             'verify' => 'required|string|min:5|max:5',
+            'g-recaptcha-response' => 'required|captcha'
+        ],[
+            'g-recaptcha-response.required' => ErrorCodes::E2001 . ' Please verify that you are not a robot.',
+            'g-recaptcha-response.captcha' => ErrorCodes::E2002 . ' Captcha error! Try again later or contact site admin.',
         ]);
     
         $confirmationCode = trim($verifyData['verify']);
@@ -153,6 +158,6 @@ class AuthController extends Controller
         $user->update(['verification_code' => null]);
     
         Auth::guard('web')->login($user);
-        return redirect()->route('dashboard')->with('success', ErrorCodes::S2002 . ' Verification successful! You are now logged in.');
+        return redirect()->signedRoute('dashboard')->with('success', ErrorCodes::S2002 . ' Verification successful! You are now logged in.');
     }
 }

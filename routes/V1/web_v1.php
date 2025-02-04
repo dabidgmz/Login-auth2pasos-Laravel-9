@@ -41,7 +41,7 @@ Route::group(['web', 'detect-malicious-scripts', 'xss'], function() {
 
     Route::get('/', function () {
         return view('login');
-    })->name('login')->middleware('notAuthenticate','signed');  // Si no está autenticado
+    })->name('login')->middleware('notAuthenticate');  // Si no está autenticado
 
     Route::get('/login', function () {
         return view('login');
@@ -53,7 +53,7 @@ Route::group(['web', 'detect-malicious-scripts', 'xss'], function() {
 
     Route::get('/register', function () {
         return view('register');
-    })->name('register')->middleware('notAuthenticate','signed');  
+    })->name('register')->middleware('notAuthenticate');  
 
     Route::get('/dashboard', function () {
         return view('dashboard');

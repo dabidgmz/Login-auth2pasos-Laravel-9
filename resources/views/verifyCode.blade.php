@@ -108,6 +108,10 @@
                 <input type="text" maxlength="1" required />
                 <input type="text" maxlength="1" required />
             </div>
+            <div>
+              {!! NoCaptcha::renderJs() !!}
+              {!! NoCaptcha::display() !!}
+            </div>
             <input type="hidden" name="verify" id="verify">
             <button type="submit" disabled>Verify</button>
         </form>
@@ -117,7 +121,7 @@
 @if (session('success'))
     <script>
         Swal.fire({
-            title: "Success!",
+            title: "¡Bienvenido!",
             text: "{{ session('success') }}",
             icon: "success",
             draggable: true,
@@ -125,14 +129,25 @@
             showConfirmButton: false
         });
     </script>
-@endif
+  @endif
 
-@if(session('error_code') == \App\Constants\Errors\V1\ErrorCodes::E404)
+  @if (session('error'))
     <script>
         Swal.fire({
             icon: "error",
             title: "Oops...",
-            text: "Invalid verification code.",
+            text: "{{ session('error') }}",
+        });
+    </script>
+  @endif
+
+  @if ($errors->any())
+    <script>
+        var errorMessages = "{{ implode(', ', $errors->all()) }}";
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: errorMessages,
         });
     </script>
 @endif
