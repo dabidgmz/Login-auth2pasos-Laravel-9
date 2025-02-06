@@ -7,17 +7,15 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Log;
 use App\Mail\VerifyEmail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Session;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\URL;
-use App\Mail\VerifyEmailAddress;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
+
+
     /**
      * Register a new user.
      *
@@ -43,7 +41,7 @@ class AuthController extends Controller
                 'max:20',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
             ],
-            'g-recaptcha-response' => 'required|captcha'
+            'h-captcha-response' => 'required'
         ], [
             'name.required' => ErrorCodes::E0R01 . ' The name field is required.',
             'name.min' => ErrorCodes::E0R02 . ' The name must be at least 3 characters.',
@@ -53,9 +51,22 @@ class AuthController extends Controller
             'password.required' => ErrorCodes::E0R06 . ' The password field is required.',
             'password.min' => ErrorCodes::E0R07 . ' The password must be at least 5 characters.',
             'password.regex' => ErrorCodes::E0R08 . ' The password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
-            'g-recaptcha-response.required' => ErrorCodes::E2001 . ' Please verify that you are not a robot.',
-            'g-recaptcha-response.captcha' => ErrorCodes::E2002 . ' Captcha error! Try again later or contact site admin.',
+            'h-captcha-response.required' => ErrorCodes::E2001 . ' Please verify that you are not a robot.',
+            'h-captcha-responsecaptcha' => ErrorCodes::E2002 . ' Captcha error! Try again later or contact site admin.',
         ]);
+
+        $hCaptchaResponse = $request->input('h-captcha-response');
+        $hCaptchaVerification = Http::asForm()->post('https://api.hcaptcha.com/siteverify', [
+            'secret'   => env('HCAPTCHA_SECRET'),
+            'response' => $hCaptchaResponse,
+            'remoteip' => $request->ip()
+        ]);
+
+        if (!$hCaptchaVerification->json()['success'] ?? false) {
+            return redirect()->back()
+                ->withErrors(['hcaptcha' => ErrorCodes::E2002 . ' Captcha verification failed.'])
+                ->withInput();
+        }
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -89,12 +100,25 @@ class AuthController extends Controller
         $loginData = $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string|min:8',
-            'g-recaptcha-response' => 'required|captcha'
+            'h-captcha-response' => 'required'
         ],[
-            'g-recaptcha-response.required' => ErrorCodes::E2001 . ' Please verify that you are not a robot.',
-            'g-recaptcha-response.captcha' => ErrorCodes::E2002 . ' Captcha error! Try again later or contact site admin.',
+            'h-captcha-response.required' => ErrorCodes::E2001 . ' Please verify that you are not a robot.',
+            'h-captcha-response.captcha' => ErrorCodes::E2002 . ' Captcha error! Try again later or contact site admin.',
         ]);
     
+        $hCaptchaResponse = $request->input('h-captcha-response');
+        $hCaptchaVerification = Http::asForm()->post('https://api.hcaptcha.com/siteverify', [
+            'secret'   => env('HCAPTCHA_SECRET'),
+            'response' => $hCaptchaResponse,
+            'remoteip' => $request->ip()
+        ]);
+
+        if (!$hCaptchaVerification->json()['success'] ?? false) {
+            return redirect()->back()
+                ->withErrors(['hcaptcha' => ErrorCodes::E2002 . ' Captcha verification failed.'])
+                ->withInput();
+        }
+        
         $email = filter_var(trim($loginData['email']), FILTER_SANITIZE_EMAIL);
         $password = trim($loginData['password']);
     
@@ -140,12 +164,25 @@ class AuthController extends Controller
     {
         $verifyData = $request->validate([
             'verify' => 'required|string|min:5|max:5',
-            'g-recaptcha-response' => 'required|captcha'
+            'h-captcha-response' => 'required'
         ],[
-            'g-recaptcha-response.required' => ErrorCodes::E2001 . ' Please verify that you are not a robot.',
-            'g-recaptcha-response.captcha' => ErrorCodes::E2002 . ' Captcha error! Try again later or contact site admin.',
+            'h-captcha-response.required' => ErrorCodes::E2001 . ' Please verify that you are not a robot.',
+            'h-captcha-response.captcha' => ErrorCodes::E2002 . ' Captcha error! Try again later or contact site admin.',
         ]);
     
+        $hCaptchaResponse = $request->input('h-captcha-response');
+        $hCaptchaVerification = Http::asForm()->post('https://api.hcaptcha.com/siteverify', [
+            'secret'   => env('HCAPTCHA_SECRET'),
+            'response' => $hCaptchaResponse,
+            'remoteip' => $request->ip()
+        ]);
+
+        if (!$hCaptchaVerification->json()['success'] ?? false) {
+            return redirect()->back()
+                ->withErrors(['hcaptcha' => ErrorCodes::E2002 . ' Captcha verification failed.'])
+                ->withInput();
+        }
+        
         $confirmationCode = trim($verifyData['verify']);
         $user = User::where('verification_code', $confirmationCode)->first();
     

@@ -8,6 +8,7 @@
           integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ asset('login.css') }}">
+    <script src="https://js.hcaptcha.com/1/api.js?hl=en" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
@@ -108,10 +109,7 @@
                 <input type="text" maxlength="1" required />
                 <input type="text" maxlength="1" required />
             </div>
-            <div>
-              {!! NoCaptcha::renderJs() !!}
-              {!! NoCaptcha::display() !!}
-            </div>
+            <div class="h-captcha bg-none" data-sitekey="{{ env('HCAPTCHA_SITEKEY') }}" data-theme="dark"></div>
             <input type="hidden" name="verify" id="verify">
             <button type="submit" disabled>Verify</button>
         </form>

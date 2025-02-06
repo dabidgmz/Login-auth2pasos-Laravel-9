@@ -8,6 +8,8 @@
     integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
   <link href="{{ asset('register.css') }}" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script src="https://js.hcaptcha.com/1/api.js?hl=en" async defer></script>
 </head>
 <body class="d-flex align-items-center">
   <div class="container">
@@ -54,10 +56,7 @@
               </div>
             </div>
             <!-- reCAPTCHA -->
-            <div class="form-group mt-3">
-              {!! NoCaptcha::renderJs() !!}
-              {!! NoCaptcha::display() !!}
-            </div>
+            <div class="h-captcha bg-none" data-sitekey="{{ env('HCAPTCHA_SITEKEY') }}" data-theme="dark"></div>
             <div class="col-12 login-btm login-button d-flex justify-content-center">
               <button type="submit" id="register-btn" class="btn btn-outline-primary" disabled>Register</button>
             </div>

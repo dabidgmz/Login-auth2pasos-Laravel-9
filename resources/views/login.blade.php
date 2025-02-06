@@ -8,6 +8,7 @@
           integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ=="
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ asset('login.css') }}">
+    <script src="https://js.hcaptcha.com/1/api.js?hl=en" async defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body style="display:flex; align-items:center; justify-content:center;">
@@ -18,10 +19,7 @@
             <h2><i class="fas fa-lock"></i> Login</h2>
             <input type="text" name="email" placeholder="Email" value="{{ old('email') }}"  />
             <input type="password" name="password" placeholder="Password"  />
-            <div>
-              {!! NoCaptcha::renderJs() !!}
-              {!! NoCaptcha::display() !!}
-            </div>
+            <div class="h-captcha bg-none" data-sitekey="{{ env('HCAPTCHA_SITEKEY') }}" data-theme="dark"></div>
             <button type="submit">Login</button>
             <p class="message">Not registered? <a href="{{ url('/register') }}">Create an account</a></p>
         </form>
